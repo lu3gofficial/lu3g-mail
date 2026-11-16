@@ -77,12 +77,65 @@ final class LU3G_Mail_Mailer {
 		}
 		self::$original_from = '';
 
+		// Nome con cui il sito si presenta al server (EHLO): il dominio del mittente, che ha un record SPF,
+		// invece del nome interno del server dell'hosting (SpamAssassin: SPF_HELO_NONE).
+		if ( '' === (string) $phpmailer->Helo && is_email( $s['from_email'] ) ) {
+			$phpmailer->Helo = substr( strrchr( $s['from_email'], '@' ), 1 );
+		}
+
+		self::tidy_html( $phpmailer );
+
 		if ( null !== self::$debug ) {
 			$phpmailer->SMTPDebug   = 3;
 			$phpmailer->Debugoutput = function ( $line ) {
 				self::$debug[] = rtrim( (string) $line );
 			};
 		}
+	}
+
+	/**
+	 * Email HTML ben formate per i filtri antispam (1.0.2), per tutte le email del sito:
+	 * - se manca la cornice <html><body> la aggiunge (SpamAssassin: HTML_MIME_NO_HTML_TAG);
+	 * - se manca la versione in testo semplice la ricava dall'HTML (MIME_HTML_ONLY): il messaggio diventa
+	 *   multipart/alternative, come con WP Mail SMTP.
+	 *
+	 * @param PHPMailer\PHPMailer\PHPMailer $phpmailer Istanza usata da wp_mail().
+	 */
+	private static function tidy_html( $phpmailer ) {
+		if ( 'text/html' !== $phpmailer->ContentType || '' === trim( (string) $phpmailer->Body ) ) {
+			return;
+		}
+		if ( ! preg_match( '/<html[\s>]/i', $phpmailer->Body ) ) {
+			$charset         = $phpmailer->CharSet ? $phpmailer->CharSet : 'UTF-8';
+			$phpmailer->Body = '<!DOCTYPE html><html><head><meta http-equiv="Content-Type" content="text/html; charset=' . esc_attr( $charset ) . '"><meta name="viewport" content="width=device-width, initial-scale=1"></head><body>'
+				. $phpmailer->Body . '</body></html>';
+		}
+		if ( '' === trim( (string) $phpmailer->AltBody ) ) {
+			$phpmailer->AltBody = self::html_to_text( $phpmailer->Body );
+		}
+	}
+
+	/** Versione in testo semplice di un'email HTML: righe e paragrafi mantenuti, link come "testo (indirizzo)". */
+	public static function html_to_text( $html ) {
+		$t = preg_replace( '#<(head|style|script|title)[^>]*>.*?</\1>#is', '', (string) $html );
+		$t = preg_replace_callback(
+			'#<a\s[^>]*href=(["\'])(.*?)\1[^>]*>(.*?)</a>#is',
+			function ( $m ) {
+				$label = trim( wp_strip_all_tags( $m[3] ) );
+				$url   = trim( $m[2] );
+				return ( '' === $label || $label === $url || 0 === strpos( $url, 'mailto:' ) ) ? ( '' !== $label ? $label : $url ) : $label . ' (' . $url . ')';
+			},
+			$t
+		);
+		$t = preg_replace( '#<br\s*/?>#i', "\n", $t );
+		$t = preg_replace( '#</(p|div|h[1-6]|tr|table|ul|ol|blockquote)>#i', "\n\n", $t );
+		$t = preg_replace( '#<li[^>]*>#i', "\n- ", $t );
+		$t = preg_replace( '#</t[dh]>#i', "  ", $t );
+		$t = html_entity_decode( wp_strip_all_tags( $t ), ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+		$t = preg_replace( "/[ \t]+/", ' ', $t );
+		$t = preg_replace( "/ *\n */", "\n", $t );
+		$t = preg_replace( "/\n{3,}/", "\n\n", $t );
+		return trim( $t );
 	}
 
 	public static function from_email( $email ) {
@@ -210,7 +263,7 @@ final class LU3G_Mail_Mailer {
 			. '<p style="margin:0 0 6px;color:#a1a1aa;font-size:12px;letter-spacing:.1em;text-transform:uppercase">LU3G Mail</p>'
 			. '<h1 style="margin:0 0 12px;font-size:22px;color:#fff">Funziona!</h1>'
 			. '<p style="margin:0 0 16px;color:#d4d4d8;line-height:1.5">Questa è l\'email di prova di <strong style="color:#fff">' . esc_html( $site ) . '</strong>. Le email del sito partono dal server SMTP.</p>'
-			. '<p style="margin:0;color:#71717a;font-size:12px">Server ' . esc_html( $s['host'] ) . ':' . (int) $s['port'] . ' · ' . esc_html( strtoupper( $s['encryption'] ) ) . ' · ' . esc_html( wp_date( 'd/m/Y H:i' ) ) . '</p>'
+			. '<p style="margin:0;color:#71717a;font-size:12px">Server ' . esc_html( $s['host'] ) . ', porta ' . (int) $s['port'] . ' · ' . esc_html( strtoupper( $s['encryption'] ) ) . ' · ' . esc_html( wp_date( 'd/m/Y H:i' ) ) . '</p>'
 			. '</div>';
 
 		$ok = wp_mail( $to, '[' . $site . '] Email di prova di LU3G Mail', $body, array( 'Content-Type: text/html; charset=UTF-8' ) );
