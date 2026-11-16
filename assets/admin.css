@@ -91,7 +91,8 @@
 
 .lm-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 14px; margin-bottom: 14px; }
 .lm-grid:has(> .lm-field:nth-child(2):last-child):not(:has(.lm-field--wide)) { grid-template-columns: 1fr 1fr; }
-.lm-field { display: grid; gap: 6px; margin-bottom: 14px; }
+/* align-content: start: due campi affiancati con altezze diverse (es. la nota sotto la password) restano allineati in alto. */
+.lm-field { display: grid; gap: 6px; align-content: start; margin-bottom: 14px; }
 .lm-grid .lm-field { margin-bottom: 0; }
 .lm-field > span { font-size: 12px; font-weight: 700; color: var(--ink-2); }
 .lm-field small { color: var(--muted); font-size: 12px; }

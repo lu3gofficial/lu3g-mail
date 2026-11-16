@@ -1,5 +1,8 @@
 # Registro delle modifiche
 
+## 1.0.1
+- Corretto: nella scheda Connessione il campo Utente stava più in basso del campo Password (la nota sotto la password allungava la riga). Ora i campi affiancati sono allineati in alto.
+
 ## 1.0.0
 - Prima versione completa: invio SMTP di tutte le email del sito, servizi già pronti (posta dell'hosting, Aruba, Register.it, Gmail/Google Workspace, Microsoft 365, Brevo, SendGrid, Mailgun, Amazon SES, IONOS), mittente forzato con return-path e "Rispondi a" al mittente originale.
 - Email di prova con messaggi d'errore comprensibili e dialogo col server (senza password).
