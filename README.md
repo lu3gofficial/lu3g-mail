@@ -25,7 +25,8 @@ l'evento `wp_mail_succeeded`).
 
 ## Passare da WP Mail SMTP
 1. Installa LU3G Mail (da LU3G Hub o caricando lo zip), ricopia server, porta, utente, password e mittente.
-2. Accendi "Invia tramite SMTP", salva e manda un'email di prova.
+2. Salva e manda un'email di prova. Non c'è un interruttore: appena il server è salvato, le email del sito partono da
+   LU3G Mail (senza server, WordPress invia come prima). Per tornare all'invio di WordPress si disattiva il plugin.
 3. Se arriva, disattiva WP Mail SMTP (due plugin SMTP attivi insieme si sovrascrivono: vince l'ultimo che configura PHPMailer).
 
 ## Struttura
@@ -41,3 +42,7 @@ l'evento `wp_mail_succeeded`).
 1. Aumenta la versione in `lu3g-mail.php` (`Version:` e `LU3G_MAIL_VERSION`) e `Stable tag` in `readme.txt`.
 2. Aggiungi la sezione in `CHANGELOG.md` (diventa la nota della release).
 3. Commit, poi `git tag vX.Y.Z && git push && git push --tags`, oppure da GitHub: Actions → Release → Run workflow.
+
+## Crediti
+Loghi di Gmail, Brevo, Mailgun e IONOS da [Simple Icons](https://simpleicons.org) (CC0). I marchi appartengono ai
+rispettivi proprietari e nel pannello servono solo a riconoscere il servizio.

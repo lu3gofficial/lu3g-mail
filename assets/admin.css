@@ -81,8 +81,6 @@
 /* -------------------------------------------------------------- schede di contenuto */
 
 .lm-card { padding: 22px; border: 1px solid var(--line); border-radius: 16px; background: var(--paper); }
-.lm-card--switch { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
-.lm-card--switch p { margin: 0; color: var(--muted); max-width: 640px; }
 .lm-card__head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
 .lm-card__head h3 { margin: 0; }
 .lm-help { margin: 0 0 14px; color: var(--muted); }
@@ -118,8 +116,11 @@
 .lm-provider:hover { border-color: #a1a1aa; transform: translateY(-1px); }
 .lm-provider[aria-checked="true"] { border-color: var(--ink); box-shadow: 0 0 0 1px var(--ink); }
 .lm-provider:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
-.lm-provider__mark { display: grid; place-items: center; flex: 0 0 auto; width: 30px; height: 30px; border-radius: 9px; background: hsl(var(--hue) 70% 52%); color: #fff; font-size: 12px; font-weight: 800; }
-.lm-provider[data-key="custom"] .lm-provider__mark { background: var(--ink); }
+.lm-provider__mark { display: grid; place-items: center; flex: 0 0 auto; width: 30px; height: 30px; border-radius: 9px; background: var(--brand, hsl(var(--hue) 70% 52%)); color: #fff; font-size: 12px; font-weight: 800; }
+/* loghi (Simple Icons) pieni, icone disegnate a linea; sempre in bianco sul colore del fornitore */
+.lm-provider__icon { display: block; width: 18px; height: 18px; }
+.lm-provider__icon--fill { fill: currentColor; }
+.lm-provider__icon--line { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
 /* Segmenti (cifratura) */
 .lm-seg { display: inline-flex; flex-wrap: wrap; gap: 4px; padding: 4px; border-radius: 12px; background: #f4f4f5; width: max-content; max-width: 100%; }
@@ -224,7 +225,6 @@
 	.lm-hero__title { font-size: 24px; }
 	.lm-stats { grid-template-columns: 1fr 1fr; }
 	.lm-grid { grid-template-columns: 1fr !important; }
-	.lm-card--switch { flex-direction: column; align-items: flex-start; }
 	.lu3g-mail .lm-logbar input { min-width: 0; width: 100%; }
 	.lm-detail dl { grid-template-columns: 1fr; }
 	.lm-toasts { left: 12px; right: 12px; align-items: stretch; }

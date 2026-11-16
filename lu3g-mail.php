@@ -3,7 +3,7 @@
  * Plugin Name:       LU3G Mail
  * Plugin URI:        https://github.com/lu3gofficial/lu3g-mail
  * Description:       Invia le email del sito tramite un server SMTP (Aruba, Register, Google Workspace, Brevo e altri), con email di prova, errori spiegati, registro degli invii e avvisi se la posta smette di partire.
- * Version:           1.0.2
+ * Version:           1.1.0
  * Requires at least: 6.0
  * Requires PHP:      7.4
  * Author:            LU3G Agenzia Web
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'LU3G_MAIL_VERSION', '1.0.2' );
+define( 'LU3G_MAIL_VERSION', '1.1.0' );
 define( 'LU3G_MAIL_FILE', __FILE__ );
 define( 'LU3G_MAIL_URL', plugin_dir_url( __FILE__ ) );
 

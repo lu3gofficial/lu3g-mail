@@ -1,5 +1,14 @@
 # Registro delle modifiche
 
+## 1.1.0
+- Niente più interruttore "Invia tramite SMTP": con il plugin attivo tutte le email del sito passano dall'SMTP appena il
+  server è salvato. Senza server WordPress invia come prima (un sito appena installato non resta senza email), e lo stato
+  in alto dice "Da configurare". Per tornare all'invio di WordPress si disattiva il plugin. Anche i siti dove
+  l'interruttore era spento, se hanno un server salvato, passano all'SMTP.
+- Schede dei fornitori con loghi e icone al posto delle iniziali: loghi ufficiali di Gmail, Brevo, Mailgun e IONOS da
+  Simple Icons (licenza CC0); icone disegnate per Altro server, Posta dell'hosting, Aruba, Register.it, Microsoft 365,
+  SendGrid e Amazon SES, che su Simple Icons non hanno il logo. Ogni icona è in bianco sul colore del fornitore.
+
 ## 1.0.2
 - Punteggio antispam migliore per **tutte** le email HTML del sito (form, ordini, email di prova):
   - se manca la cornice `<html><body>` viene aggiunta (SpamAssassin HTML_MIME_NO_HTML_TAG, −0,6 punti su mail-tester);

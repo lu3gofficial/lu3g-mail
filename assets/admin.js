@@ -205,20 +205,44 @@
 	var note = page.querySelector( '[data-provider-note]' );
 	var keys = Object.keys( cfg.providers );
 
+	var SVG = 'http://www.w3.org/2000/svg';
+
+	/** Riquadro della scheda: logo o icona in bianco sul colore del fornitore (iniziali se manca l'icona). */
+	function providerMark( key, name ) {
+		var mark = document.createElement( 'span' );
+		var icon = cfg.icons && cfg.icons[ key ];
+		mark.className = 'lm-provider__mark';
+		mark.setAttribute( 'aria-hidden', 'true' );
+		if ( ! icon ) {
+			mark.textContent = name.replace( /[^A-Za-z0-9 ]/g, ' ' ).trim().split( /\s+/ ).slice( 0, 2 ).map( function ( w ) {
+				return w.charAt( 0 );
+			} ).join( '' ).toUpperCase();
+			return mark;
+		}
+		var svg = document.createElementNS( SVG, 'svg' );
+		var path = document.createElementNS( SVG, 'path' );
+		svg.setAttribute( 'viewBox', '0 0 24 24' );
+		svg.setAttribute( 'focusable', 'false' );
+		svg.setAttribute( 'class', 'lm-provider__icon lm-provider__icon--' + icon[ 1 ] );
+		path.setAttribute( 'd', icon[ 2 ] );
+		svg.appendChild( path );
+		mark.style.setProperty( '--brand', icon[ 0 ] );
+		mark.appendChild( svg );
+		return mark;
+	}
+
 	keys.forEach( function ( key, n ) {
 		var p = cfg.providers[ key ];
 		var b = document.createElement( 'button' );
-		var initials = p.name.replace( /[^A-Za-z0-9 ]/g, ' ' ).trim().split( /\s+/ ).slice( 0, 2 ).map( function ( w ) {
-			return w.charAt( 0 );
-		} ).join( '' ).toUpperCase();
+		var label = document.createElement( 'span' );
 		b.type = 'button';
 		b.className = 'lm-provider';
 		b.setAttribute( 'role', 'radio' );
 		b.setAttribute( 'data-key', key );
 		b.style.setProperty( '--hue', ( n * 47 ) % 360 );
-		b.innerHTML = '<span class="lm-provider__mark" aria-hidden="true"></span><span></span>';
-		b.firstChild.textContent = 'custom' === key ? '+' : initials;
-		b.lastChild.textContent = p.name;
+		label.textContent = p.name;
+		b.appendChild( providerMark( key, p.name ) );
+		b.appendChild( label );
 		b.addEventListener( 'click', function () {
 			pickProvider( key, true );
 		} );

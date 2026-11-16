@@ -39,7 +39,6 @@ final class LU3G_Mail_Settings {
 
 	public static function defaults() {
 		return array(
-			'enabled'         => false,          // finché non è acceso, WordPress invia come prima
 			'provider'        => 'custom',
 			'host'            => '',
 			'port'            => 587,
@@ -88,10 +87,14 @@ final class LU3G_Mail_Settings {
 		return isset( self::CONSTANTS[ $field ] ) && defined( self::CONSTANTS[ $field ] );
 	}
 
-	/** Pronto per inviare: acceso e con un server. */
+	/**
+	 * Pronto per inviare: basta un server. Non c'è un interruttore: con il plugin attivo tutte le email passano
+	 * dall'SMTP appena il server è inserito (prima, WordPress invia come sempre, così un sito appena installato non
+	 * resta senza email). Per tornare all'invio di WordPress si disattiva il plugin.
+	 */
 	public static function ready() {
 		$s = self::get();
-		return $s['enabled'] && '' !== trim( (string) $s['host'] );
+		return '' !== trim( (string) $s['host'] );
 	}
 
 	/**
@@ -105,7 +108,7 @@ final class LU3G_Mail_Settings {
 		$old = wp_parse_args( is_array( $old ) ? $old : array(), self::defaults() );
 		$new = $old;
 
-		$bool = array( 'enabled', 'auto_tls', 'auth', 'force_from', 'force_from_name', 'return_path', 'log_enabled', 'log_body', 'fallback' );
+		$bool = array( 'auto_tls', 'auth', 'force_from', 'force_from_name', 'return_path', 'log_enabled', 'log_body', 'fallback' );
 		foreach ( $bool as $key ) {
 			if ( array_key_exists( $key, $input ) ) {
 				$new[ $key ] = filter_var( $input[ $key ], FILTER_VALIDATE_BOOLEAN );
@@ -211,6 +214,30 @@ final class LU3G_Mail_Settings {
 	/**
 	 * Impostazioni note dei servizi più usati. "user" è un suggerimento per il campo utente.
 	 */
+	/**
+	 * Icona e colore di ogni fornitore, disegnati nel riquadro della scheda (bianco sul colore del marchio).
+	 * - 'fill': loghi ufficiali da Simple Icons (https://simpleicons.org, licenza CC0) – Gmail, Brevo, Mailgun, IONOS;
+	 *   i marchi appartengono ai rispettivi proprietari e servono solo a riconoscere il servizio.
+	 * - 'line': icone generiche disegnate per LU3G Mail dove Simple Icons non ha il logo (Microsoft, Amazon e SendGrid
+	 *   lo hanno fatto togliere; Aruba e Register.it non ci sono): server, chiocciola, busta, mondo, aeroplanino, nuvola.
+	 * Formato: chiave => array( colore, tipo, tracciato SVG in un riquadro 24×24 ).
+	 */
+	public static function icons() {
+		return array(
+			'custom' => array( '#18181b', 'line', 'M4 3h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zM4 13h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2zM6 7h.01M6 17h.01' ),
+			'hosting' => array( '#52525b', 'line', 'M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0zM16 12v1.5a2.5 2.5 0 0 0 5 0V12a9 9 0 1 0-3.5 7.1' ),
+			'aruba' => array( '#f39200', 'line', 'M4 5h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2zM22 7l-10 6L2 7' ),
+			'register' => array( '#0057b8', 'line', 'M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zM2 12h20M12 2a15 15 0 0 1 0 20M12 2a15 15 0 0 0 0 20' ),
+			'gmail' => array( '#ea4335', 'fill', 'M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.273H1.636A1.636 1.636 0 0 1 0 19.366V5.457c0-2.023 2.309-3.178 3.927-1.964L5.455 4.64 12 9.548l6.545-4.91 1.528-1.145C21.69 2.28 24 3.434 24 5.457z' ),
+			'office365' => array( '#0078d4', 'line', 'M4 5h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2zM22 7l-10 6L2 7' ),
+			'brevo' => array( '#0b996e', 'fill', 'M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zM7.2 4.8h5.747c2.34 0 3.895 1.406 3.895 3.516 0 1.022-.348 1.862-1.09 2.588C17.189 11.812 18 13.22 18 14.785c0 2.86-2.64 5.016-6.164 5.016H7.199v-15zm2.085 1.952v5.537h.07c.233-.432.858-.796 2.249-1.226 2.039-.659 3.037-1.52 3.037-2.655 0-.998-.766-1.656-1.924-1.656H9.285zm4.87 5.266c-.766.385-1.67.748-2.76 1.11-1.229.387-2.11 1.386-2.11 2.407v2.315h2.365c2.387 0 4.149-1.34 4.149-3.155 0-1.067-.625-2.087-1.645-2.677z' ),
+			'sendgrid' => array( '#1a82e2', 'line', 'M22 2 11 13M22 2l-7 20-4-9-9-4z' ),
+			'mailgun' => array( '#f06b66', 'fill', 'M11.837 0c6.602 0 11.984 5.381 11.984 11.994-.017 2.99-3.264 4.84-5.844 3.331a3.805 3.805 0 0 1-.06-.035l-.055-.033-.022.055c-2.554 4.63-9.162 4.758-11.894.232-2.732-4.527.46-10.313 5.746-10.416a6.868 6.868 0 0 1 7.002 6.866 1.265 1.265 0 0 0 2.52 0c0-5.18-4.197-9.38-9.377-9.387C4.611 2.594.081 10.41 3.683 16.673c3.238 5.632 11.08 6.351 15.289 1.402l1.997 1.686A11.95 11.95 0 0 1 11.837 24C2.6 23.72-2.87 13.543 1.992 5.684A12.006 12.006 0 0 1 11.837 0Zm0 7.745c-3.276-.163-5.5 3.281-4.003 6.2a4.26 4.26 0 0 0 4.014 2.31c3.276-.171 5.137-3.824 3.35-6.575a4.26 4.26 0 0 0-3.36-1.935Zm0 2.53c1.324 0 2.152 1.433 1.49 2.58a1.72 1.72 0 0 1-1.49.86 1.72 1.72 0 1 1 0-3.44Z' ),
+			'ses' => array( '#ff9900', 'line', 'M17.5 19H7a5 5 0 1 1 .9-9.92A6 6 0 0 1 19 11a4 4 0 0 1-1.5 8z' ),
+			'ionos' => array( '#003d8f', 'fill', 'M22.182 15.499a1.7634 1.7634 0 0 1-.3536-.0358 1.8319 1.8319 0 0 1-1.2086-.8632l-.0066-.012c-.1308-.2616-.0448-.5693.2-.7162a.5236.5236 0 0 1 .2689-.0743.5327.5327 0 0 1 .4632.272.558.558 0 0 0 .018.0299l.0564.0766.0757.0765a.7385.7385 0 0 0 .3453.167.7596.7596 0 0 0 .5954-.136.7206.7206 0 0 0 .299-.5386.7441.7441 0 0 0-.207-.578s-1.5994-1.6612-1.6712-1.7382a1.9604 1.9604 0 0 1-.1929-.229c-.2256-.3198-.2962-.697-.2614-1.0702a1.7361 1.7361 0 0 1 .2253-.7397s.0732-.124.0948-.1554c.0847-.1236.2515-.2834.3658-.3726a1.8813 1.8813 0 0 1 .3069-.1844 1.7494 1.7494 0 0 1 2.2815.7041.5186.5186 0 0 1 .0553.402.5298.5298 0 0 1-.2528.3263.5082.5082 0 0 1-.2593.0705.5283.5283 0 0 1-.46-.2706.6953.6953 0 0 0-.4656-.329.721.721 0 0 0-.5645.1269.688.688 0 0 0-.267.498.6998.6998 0 0 0 .1905.5398l1.6351 1.6862a1.8284 1.8284 0 0 1 .5071 1.3931c-.0465.5243-.3071.9994-.7152 1.3053a1.8425 1.8425 0 0 1-1.0984.369m-5.175-.0006a1.7608 1.7608 0 0 0 1.7585-1.7589v-3.4787a1.7587 1.7587 0 0 0-3.5173 0v3.4786a1.7608 1.7608 0 0 0 1.7587 1.7589m0-5.9342c.3777 0 .6968.319.6968.6967v3.4786a.6977.6977 0 0 1-.6968.6968.6894.6894 0 0 1-.6968-.6968v-3.4786a.6976.6976 0 0 1 .697-.6967m-7.8986.3224v5.0804a.5309.5309 0 0 0 1.0618 0V12.09Zm2.8802 2.0255V9.0328a.531.531 0 0 1 1.0619 0v5.0828zm1.053 2.9406v.1134a.533.533 0 0 1-1.0067.2408L9.1153 9.154v-.1212a.5261.5261 0 0 1 .3028-.4772.5253.5253 0 0 1 .7088.2475Zm-7.9067.6457a1.761 1.761 0 0 0 1.7586-1.7589v-3.4786a1.7587 1.7587 0 0 0-3.5173 0v3.4786a1.7609 1.7609 0 0 0 1.7587 1.7589m0-5.9342a.707.707 0 0 1 .6968.6967v3.4786a.6968.6968 0 1 1-1.3936 0v-3.4786a.6976.6976 0 0 1 .6968-.6967M0 14.9111a.5791.5791 0 1 0 1.1581 0V9.0803a.5791.5791 0 0 0-1.1582 0z' ),
+		);
+	}
+
 	public static function providers() {
 		$domain = wp_parse_url( home_url(), PHP_URL_HOST );
 		$domain = preg_replace( '/^www\./', '', (string) $domain );

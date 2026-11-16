@@ -75,6 +75,7 @@ final class LU3G_Mail_Admin {
 				'nonce'       => wp_create_nonce( 'lu3g_mail' ),
 				'settings'    => $s,
 				'providers'   => LU3G_Mail_Settings::providers(),
+				'icons'       => LU3G_Mail_Settings::icons(),
 				'locked'      => $locked,
 				'hasPassword' => LU3G_Mail_Settings::has_password(),
 				'adminEmail'  => get_option( 'admin_email' ),
@@ -95,7 +96,7 @@ final class LU3G_Mail_Admin {
 		$logo  = (string) file_get_contents( dirname( LU3G_MAIL_FILE ) . '/assets/lu3g-logo.svg' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 
 		if ( ! LU3G_Mail_Settings::ready() ) {
-			$status = array( 'off', 'Spento: WordPress invia come prima' );
+			$status = array( 'off', 'Da configurare: finché manca il server WordPress invia come prima' );
 		} elseif ( $err ) {
 			$status = array( 'error', 'Le email non partono' );
 		} else {
@@ -153,14 +154,6 @@ final class LU3G_Mail_Admin {
 
 				<!-- Connessione -->
 				<section class="lm-panel is-current" data-panel="connection" role="tabpanel">
-					<div class="lm-card lm-card--switch">
-						<div>
-							<h3>Invia tramite SMTP</h3>
-							<p>Acceso, tutte le email del sito (form, ordini, password) partono dal server qui sotto. Spento, WordPress invia come prima.</p>
-						</div>
-						<?php echo self::switch_html( 'enabled', 'Attivo', $s['enabled'] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-					</div>
-
 					<div class="lm-card">
 						<h3>Servizio</h3>
 						<p class="lm-help">Scegli il fornitore della posta: server, porta e cifratura si compilano da soli.</p>
@@ -332,9 +325,9 @@ define( 'LU3G_MAIL_FROM_NAME', 'Cliente Srl' );</pre>
 				$input = isset( $_POST['settings'] ) ? json_decode( wp_unslash( $_POST['settings'] ), true ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanificato in save()
 				$s     = LU3G_Mail_Settings::save( is_array( $input ) ? $input : array() );
 				$warn  = '';
-				if ( $s['enabled'] && '' === $s['host'] ) {
+				if ( '' === $s['host'] ) {
 					$warn = 'Manca il server SMTP: finché non lo inserisci WordPress invia come prima.';
-				} elseif ( $s['enabled'] && $s['auth'] && '' === $s['password'] ) {
+				} elseif ( $s['auth'] && '' === $s['password'] ) {
 					$warn = 'Manca la password.';
 				}
 				unset( $s['password'] );
@@ -355,7 +348,7 @@ define( 'LU3G_MAIL_FROM_NAME', 'Cliente Srl' );</pre>
 					wp_send_json_error( array( 'message' => 'Scrivi un indirizzo email valido.' ) );
 				}
 				if ( ! LU3G_Mail_Settings::ready() ) {
-					wp_send_json_error( array( 'message' => 'Accendi "Invia tramite SMTP", inserisci il server e salva prima di provare.' ) );
+					wp_send_json_error( array( 'message' => 'Inserisci il server e salva prima di provare.' ) );
 				}
 				$result           = LU3G_Mail_Mailer::test( $to );
 				$result['stats']  = LU3G_Mail_Log::stats( 7 );
@@ -409,7 +402,7 @@ define( 'LU3G_MAIL_FROM_NAME', 'Cliente Srl' );</pre>
 	private static function status_label() {
 		$s = LU3G_Mail_Settings::get();
 		if ( ! LU3G_Mail_Settings::ready() ) {
-			return array( 'off', 'Spento: WordPress invia come prima' );
+			return array( 'off', 'Da configurare: finché manca il server WordPress invia come prima' );
 		}
 		if ( LU3G_Mail_Mailer::current_error() ) {
 			return array( 'error', 'Le email non partono' );
